@@ -101,3 +101,8 @@ int main() {
     
     return 0;
 }
+S=AB
+
+A=a
+
+B=b
