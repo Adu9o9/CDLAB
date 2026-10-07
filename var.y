@@ -32,3 +32,10 @@ int main() {
     yyparse();
     return 0;
 }
+lex var.l
+
+yacc -d var.y (The -d generates y.tab.h)
+
+gcc lex.yy.c y.tab.c -w (The -w suppresses annoying warnings)
+
+./a.out
