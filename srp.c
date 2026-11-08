@@ -1,76 +1,70 @@
 #include <stdio.h>
 #include <string.h>
 
-char stack[50], input[50];
-int st_ptr = 0, len;
+int i = 0, j = 0, c = 0;
+char a[20], stk[20], act[10];
 
-// The REDUCE function
+// Function to check and perform reductions
 void check() {
-    int i;
+    strcpy(act, "REDUCE");
     
-    // Check for Handle: i  --> Reduce to E
-    for (i = 0; i < st_ptr; i++) {
-        if (stack[i] == 'i') {
-            stack[i] = 'E';
-            printf("\n$%s\t\t%s$\t\tReduce E->i", stack, input);
+    // Check for 'i' -> E
+    for (int z = 0; z < c; z++) {
+        if (stk[z] == 'i') {
+            stk[z] = 'E';
+            stk[z + 1] = '\0';
+            printf("$%s\t%s$\t%s\n", stk, a, act);
         }
     }
     
-    // Check for Handle: E+E --> Reduce to E
-    for (i = 0; i < st_ptr - 2; i++) {
-        if (stack[i] == 'E' && stack[i+1] == '+' && stack[i+2] == 'E') {
-            stack[i] = 'E';
-            stack[i+1] = '\0';
-            stack[i+2] = '\0';
-            st_ptr = st_ptr - 2; // Pull stack pointer back by 2
-            printf("\n$%s\t\t%s$\t\tReduce E->E+E", stack, input);
+    // Check for E+E -> E
+    for (int z = 0; z < c - 2; z++) {
+        if (stk[z] == 'E' && stk[z + 1] == '+' && stk[z + 2] == 'E') {
+            stk[z] = 'E';
+            stk[z + 1] = '\0';
+            stk[z + 2] = '\0';
+            printf("$%s\t%s$\t%s\n", stk, a, act);
+            i = i - 2; // Adjust stack pointer
         }
     }
     
-    // Check for Handle: E*E --> Reduce to E
-    for (i = 0; i < st_ptr - 2; i++) {
-        if (stack[i] == 'E' && stack[i+1] == '*' && stack[i+2] == 'E') {
-            stack[i] = 'E';
-            stack[i+1] = '\0';
-            stack[i+2] = '\0';
-            st_ptr = st_ptr - 2; // Pull stack pointer back by 2
-            printf("\n$%s\t\t%s$\t\tReduce E->E*E", stack, input);
+    // Check for E*E -> E
+    for (int z = 0; z < c - 2; z++) {
+        if (stk[z] == 'E' && stk[z + 1] == '*' && stk[z + 2] == 'E') {
+            stk[z] = 'E';
+            stk[z + 1] = '\0';
+            stk[z + 2] = '\0';
+            printf("$%s\t%s$\t%s\n", stk, a, act);
+            i = i - 2; // Adjust stack pointer
         }
     }
 }
 
 int main() {
-    printf("Compiler Lab - Shift Reduce Parser\n");
-    printf("Enter the input string (e.g., i+i*i): ");
-    scanf("%s", input);
-    len = strlen(input);
-
-    printf("\nStack\t\tInput\t\tAction");
-    printf("\n--------------------------------------------");
-
-    // The SHIFT loop
-    for (int j = 0; j < len; j++) {
-        // 1. Shift first char of input onto stack
-        stack[st_ptr] = input[0];
-        stack[st_ptr + 1] = '\0';
-        st_ptr++;
+    printf("Enter input string (e.g., i+i*i): ");
+    scanf("%s", a);
+    c = strlen(a);
+    
+    printf("STACK\tINPUT\tACTION\n");
+    
+    for (int k = 0; j < c; k++, i++, j++) {
+        // Shift action
+        strcpy(act, "SHIFT");
+        stk[i] = a[j];
+        stk[i + 1] = '\0';
+        a[j] = ' '; // Clear from input buffer
         
-        // 2. Remove that char from input buffer (shift the array left)
-        memmove(input, input + 1, strlen(input));
-
-        printf("\n$%s\t\t%s$\t\tShift", stack, input);
-
-        // 3. Try to Reduce
+        printf("$%s\t%s$\t%s\n", stk, a, act);
+        
+        // After every shift, check if a reduction is possible
         check();
     }
-
-    // ACCEPT phase
-    if (st_ptr == 1 && stack[0] == 'E') {
-        printf("\n\nResult: String Accepted!\n");
+    
+    if (stk[0] == 'E' && stk[1] == '\0') {
+        printf("\nResult: String Accepted\n");
     } else {
-        printf("\n\nResult: Syntax Error!\n");
+        printf("\nResult: String Rejected\n");
     }
-
+    
     return 0;
 }
-i+i
