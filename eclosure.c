@@ -1,64 +1,57 @@
 #include <stdio.h>
-#include <string.h>
 
-int num_states, num_transitions;
-char transitions[20][3][10]; // [transition_index][0:from, 1:input, 2:to]
+int n; // Total number of states
+int epsilon_graph[20][20]; // 2D Adjacency Matrix for epsilon transitions
 int visited[20];
 
-// Recursive function to find e-closure
-void find_closure(int state_index, char states[][10]) {
-    // Mark current state as visited and print it
-    visited[state_index] = 1;
-    printf("%s ", states[state_index]);
+// Recursive DFS to find all reachable states via epsilon
+void find_closure(int state) {
+    visited[state] = 1;
+    printf("q%d ", state); // Print the state as part of the closure
     
-    // Check all transitions
-    for (int i = 0; i < num_transitions; i++) {
-        // If the transition is FROM our current state AND the input is 'e' (epsilon)
-        if (strcmp(transitions[i][0], states[state_index]) == 0 && strcmp(transitions[i][1], "e") == 0) {
-            
-            // Find the index of the TARGET state
-            int target_index = -1;
-            for (int j = 0; j < num_states; j++) {
-                if (strcmp(states[j], transitions[i][2]) == 0) {
-                    target_index = j;
-                    break;
-                }
-            }
-            
-            // If it hasn't been visited in this closure run, recurse into it
-            if (target_index != -1 && visited[target_index] == 0) {
-                find_closure(target_index, states);
-            }
+    // Check all possible next states
+    for (int i = 0; i < n; i++) {
+        // If there is an epsilon path to state 'i' and it hasn't been visited yet
+        if (epsilon_graph[state][i] == 1 && !visited[i]) {
+            find_closure(i); 
         }
     }
 }
 
 int main() {
-    char states[20][10];
+    int edges, u, v;
     
     printf("Enter number of states: ");
-    scanf("%d", &num_states);
+    scanf("%d", &n);
     
-    printf("Enter the states (e.g., q0 q1 q2): \n");
-    for (int i = 0; i < num_states; i++) {
-        scanf("%s", states[i]);
-    }
+    // Initialize matrix with 0
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            epsilon_graph[i][j] = 0;
+            
+    printf("Enter number of epsilon transitions: ");
+    scanf("%d", &edges);
     
-    printf("Enter number of transitions: ");
-    scanf("%d", &num_transitions);
+    char symbol; // Add a variable to hold 'e', 'a', 'b', etc.
     
-    printf("Enter transitions format: (From_State Input To_State). Use 'e' for epsilon.\n");
-    for (int i = 0; i < num_transitions; i++) {
-        scanf("%s %s %s", transitions[i][0], transitions[i][1], transitions[i][2]);
+    printf("Enter transitions (Format: start_state symbol end_state, use 'e' for epsilon):\n");
+    for (int i = 0; i < edges; i++) {
+        // The space before %c is CRITICAL to ignore trailing newlines/spaces!
+        scanf("%d %c %d", &u, &symbol, &v);
+        
+        // Only map it to the graph if it is an epsilon transition
+        if (symbol == 'e') {
+            epsilon_graph[u][v] = 1;
+        }
     }
     
     printf("\n--- Epsilon Closures ---\n");
-    for (int i = 0; i < num_states; i++) {
-        // Reset visited array for each state's closure calculation
-        for (int v = 0; v < num_states; v++) visited[v] = 0;
+    for (int i = 0; i < n; i++) {
+        // Reset the visited array for each new state evaluation
+        for(int j = 0; j < n; j++) visited[j] = 0;
         
-        printf("e-closure(%s) = { ", states[i]);
-        find_closure(i, states); // Starts the recursive DFS
+        printf("Epsilon closure of q%d: { ", i);
+        find_closure(i);
         printf("}\n");
     }
     
